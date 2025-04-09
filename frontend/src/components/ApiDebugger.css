@@ -1,0 +1,147 @@
+.api-debugger-toggle {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  padding: 10px 15px;
+  background-color: #2c3e50;
+  color: white;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  z-index: 1000;
+  font-size: 14px;
+}
+
+.api-debugger-toggle.has-errors {
+  background-color: #e74c3c;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(231, 76, 60, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
+  }
+}
+
+.api-debugger {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  width: 500px;
+  max-height: 400px;
+  background-color: #ffffff;
+  border-radius: 5px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.api-debugger-header {
+  background-color: #2c3e50;
+  color: white;
+  padding: 10px 15px;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.api-debugger-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.api-debugger-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.api-debugger-actions button {
+  background-color: transparent;
+  border: 1px solid white;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.api-debugger-actions button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.api-debugger-content {
+  padding: 10px;
+  overflow-y: auto;
+  max-height: 340px;
+  min-height: 200px;
+}
+
+.event {
+  margin-bottom: 15px;
+  border-radius: 4px;
+  border-left: 4px solid #3498db;
+  background-color: #f5f5f5;
+  overflow: hidden;
+}
+
+.event.error {
+  border-left-color: #e74c3c;
+}
+
+.event.request {
+  border-left-color: #2ecc71;
+}
+
+.event.response {
+  border-left-color: #3498db;
+}
+
+.event-header {
+  padding: 8px 10px;
+  display: flex;
+  justify-content: space-between;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.event-type {
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.event-time {
+  color: #777;
+  font-size: 12px;
+}
+
+.event-data {
+  margin: 0;
+  padding: 10px;
+  font-size: 12px;
+  white-space: pre-wrap;
+  overflow-x: auto;
+  max-height: 200px;
+  font-family: monospace;
+}
+
+.no-events {
+  text-align: center;
+  color: #777;
+  padding: 20px;
+}
+
+@media (max-width: 600px) {
+  .api-debugger {
+    width: calc(100% - 20px);
+    left: 10px;
+    right: 10px;
+  }
+}

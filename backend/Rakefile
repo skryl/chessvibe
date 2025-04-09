@@ -1,0 +1,44 @@
+require 'sinatra/activerecord/rake'
+require_relative 'app'
+require 'rspec/core/rake_task'
+
+namespace :db do
+  task :load_config do
+    require './app'
+  end
+
+  desc 'Seed the database with sample data'
+  task :seed => :environment do
+    # Create some sample users
+    user1 = User.create!(username: 'player1')
+    user2 = User.create!(username: 'player2')
+
+    puts "Created sample users: #{user1.username}, #{user2.username}"
+  end
+end
+
+namespace :test do
+  RSpec::Core::RakeTask.new(:all) do |t|
+    t.pattern = 'spec/**/*_spec.rb'
+  end
+
+  RSpec::Core::RakeTask.new(:api) do |t|
+    t.pattern = 'spec/api/*_spec.rb'
+  end
+
+  RSpec::Core::RakeTask.new(:users) do |t|
+    t.pattern = 'spec/api/users_spec.rb'
+  end
+
+  RSpec::Core::RakeTask.new(:games) do |t|
+    t.pattern = 'spec/api/games_spec.rb'
+  end
+end
+
+desc 'Run all tests'
+task :test => 'test:all'
+
+desc 'Start the application'
+task :start do
+  system 'bundle exec puma -p 4567'
+end

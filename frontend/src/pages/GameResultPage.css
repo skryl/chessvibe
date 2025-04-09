@@ -1,0 +1,152 @@
+.game-result-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.result-title {
+  text-align: center;
+  margin-bottom: 30px;
+  color: var(--primary-color);
+}
+
+.result-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+}
+
+.result-header {
+  text-align: center;
+  margin-bottom: 30px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+}
+
+.result-header h2 {
+  color: var(--primary-color);
+  margin-bottom: 10px;
+}
+
+.game-info {
+  color: #777;
+  margin: 0;
+}
+
+.players-result {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.player-result {
+  flex: 1;
+  padding: 20px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.player-result.white {
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 1px solid #ddd;
+}
+
+.player-result.black {
+  background-color: rgba(0, 0, 0, 0.05);
+  border: 1px solid #ddd;
+}
+
+.player-result h3 {
+  margin-top: 0;
+  color: var(--primary-color);
+  margin-bottom: 15px;
+}
+
+.vs {
+  font-size: 20px;
+  font-weight: bold;
+  color: #888;
+  margin: 0 20px;
+}
+
+.elo-change {
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+.elo-rating {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.elo-diff {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 14px;
+}
+
+.elo-diff.positive {
+  background-color: rgba(46, 204, 113, 0.2);
+  color: #27ae60;
+}
+
+.elo-diff.negative {
+  background-color: rgba(231, 76, 60, 0.2);
+  color: #c0392b;
+}
+
+.elo-diff.neutral {
+  background-color: rgba(189, 195, 199, 0.2);
+  color: #7f8c8d;
+}
+
+.player-stats {
+  text-align: left;
+  margin-top: 15px;
+}
+
+.player-stats p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.loading, .error {
+  text-align: center;
+  margin: 50px 0;
+  padding: 20px;
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.error {
+  color: var(--accent-color);
+}
+
+@media (max-width: 768px) {
+  .players-result {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .vs {
+    margin: 10px 0;
+  }
+
+  .player-result {
+    width: 100%;
+  }
+}
