@@ -7,7 +7,6 @@ import GameSetupPage from './pages/GameSetupPage';
 import GamePlayPage from './pages/GamePlayPage';
 import GameResultPage from './pages/GameResultPage';
 import LeaderboardPage from './pages/LeaderboardPage';
-import ApiDebugger from './components/ApiDebugger';
 
 const App = () => {
   return (
@@ -24,7 +23,6 @@ const App = () => {
         </Routes>
       </main>
       <Footer />
-      <ApiDebugger />
     </div>
   );
 };

@@ -145,3 +145,23 @@
     right: 10px;
   }
 }
+
+.api-debugger-filters {
+  padding: 8px 10px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.api-debugger-filter {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.api-debugger-filter input[type="checkbox"] {
+  margin-right: 5px;
+}

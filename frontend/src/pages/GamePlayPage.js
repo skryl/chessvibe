@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ChessBoard from '../components/ChessBoard';
-import api from '../services/api';
+import DebugPanel from '../components/DebugPanel';
+import api, { updateApiDebugConfig } from '../services/api';
+import { setDebugConfig, debugEvents } from '../components/ApiDebugger';
 import './GamePlayPage.css';
 
 const GamePlayPage = () => {
@@ -14,25 +16,163 @@ const GamePlayPage = () => {
   const [error, setError] = useState('');
   const [selectedPlayer, setSelectedPlayer] = useState('');
   const [showPlayerSelection, setShowPlayerSelection] = useState(true);
+  const [debugMessages, setDebugMessages] = useState([]);
+  const [clickEvents, setClickEvents] = useState([]);
+  const [apiEvents, setApiEvents] = useState([]);
+  const [debugOptions, setDebugOptions] = useState({
+    showPollingRequests: false,
+    showApiResponses: true
+  });
+
+  // Function to log click events for the debug panel
+  const logClickEvent = useCallback((message) => {
+    console.log("LOGGING CLICK EVENT:", message);
+    const timestamp = new Date().toLocaleTimeString();
+    const newEvent = `${timestamp}: ${message}`;
+
+    // Use a callback to update state to ensure proper state updates
+    setClickEvents(prev => {
+      console.log("Previous click events:", prev);
+      const updated = [newEvent, ...prev].slice(0, 20);
+      console.log("Updated click events:", updated);
+      return updated;
+    });
+  }, []);
+
+  // Subscribe to API events
+  useEffect(() => {
+    // Convert API events to formatted strings
+    const formatApiEvent = (event) => {
+      const time = new Date(event.timestamp).toLocaleTimeString();
+      const type = event.type.toUpperCase();
+
+      let details = '';
+      if (event.type === 'request') {
+        details = `${event.data.method} ${event.data.url}`;
+      } else if (event.type === 'response') {
+        details = `${event.data.status} ${event.data.url} (${event.data.duration || 'unknown'})`;
+      } else if (event.type === 'error') {
+        details = event.data.message;
+      }
+
+      return `${time}: [${type}] ${details}`;
+    };
+
+    // Get initial events
+    const initialApiEvents = debugEvents.lastEvents.map(formatApiEvent);
+    setApiEvents(initialApiEvents);
+
+    // Subscribe to new events
+    const unsubscribe = debugEvents.addListener(event => {
+      const formattedEvent = formatApiEvent(event);
+      setApiEvents(prev => [formattedEvent, ...prev].slice(0, 20));
+      console.log("API event captured:", formattedEvent);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  // Sync debug options with all debuggers
+  useEffect(() => {
+    setDebugConfig({ showPollingRequests: debugOptions.showPollingRequests });
+    updateApiDebugConfig({ showPollingRequests: debugOptions.showPollingRequests });
+  }, [debugOptions.showPollingRequests]);
+
+  // Add a debug log function
+  const addDebugMessage = useCallback((message, options = {}) => {
+    console.log("ADDING DEBUG MESSAGE:", message);
+    // Skip polling requests if the option is disabled
+    if (options.isPollingRequest && !debugOptions.showPollingRequests) {
+      return;
+    }
+
+    const formattedMessage = `${new Date().toLocaleTimeString()}: ${message}`;
+
+    // Use a callback to update state to ensure proper state updates
+    setDebugMessages(prev => {
+      console.log("Previous debug messages:", prev);
+      const updated = [formattedMessage, ...prev].slice(0, 20);
+      console.log("Updated debug messages:", updated);
+      return updated;
+    });
+
+    console.log(`DEBUG: ${message}`);
+  }, [debugOptions.showPollingRequests]);
+
+  // Add initial debug messages when component mounts
+  useEffect(() => {
+    // Add a forced debug message directly
+    const initialMessage = `${new Date().toLocaleTimeString()}: Debug panel initialized`;
+    const initialEvent = `${new Date().toLocaleTimeString()}: Debug system ready - waiting for game interaction`;
+    const initialApiEvent = `${new Date().toLocaleTimeString()}: [INIT] API Debugger ready`;
+
+    // Force-set initial messages
+    setDebugMessages([initialMessage]);
+    setClickEvents([initialEvent]);
+    setApiEvents([initialApiEvent]);
+
+    console.log("Set initial debug message:", initialMessage);
+    console.log("Set initial click event:", initialEvent);
+    console.log("Set initial API event:", initialApiEvent);
+
+    // Add more debug messages after a small delay to ensure they appear
+    setTimeout(() => {
+      addDebugMessage(`Game ID: ${gameId}`);
+      logClickEvent('Click on a chess piece to see events');
+    }, 500);
+  }, [gameId, addDebugMessage, logClickEvent]);
+
+  // Log state changes in the debug arrays for debugging
+  useEffect(() => {
+    console.log("Debug messages state updated:", debugMessages);
+  }, [debugMessages]);
 
   useEffect(() => {
-    fetchGameData();
+    console.log("Click events state updated:", clickEvents);
+  }, [clickEvents]);
+
+  useEffect(() => {
+    console.log("API events state updated:", apiEvents);
+  }, [apiEvents]);
+
+  useEffect(() => {
+    fetchGameData(false); // Initial load, not from polling
 
     // Poll for updates every 5 seconds
-    const interval = setInterval(fetchGameData, 5000);
+    const interval = setInterval(() => fetchGameData(true), 5000);
 
     return () => clearInterval(interval);
   }, [gameId]);
 
-  const fetchGameData = async () => {
+  const fetchGameData = async (isPolling = false) => {
     try {
       setIsLoading(true);
-      const gameData = await api.getGame(gameId);
-      const prettyData = await api.getPrettyBoard(gameId);
+
+      // Only log if it's not a polling request or if we want to show polling requests
+      if (!isPolling || debugOptions.showPollingRequests) {
+        addDebugMessage(`Fetching game data for game ${gameId}${isPolling ? ' (polling)' : ''}`,
+                        { isPollingRequest: isPolling });
+      }
+
+      const gameData = await api.getGame(gameId, isPolling);
+      console.log("Game data received:", gameData);
+
+      const prettyData = await api.getPrettyBoard(gameId, isPolling);
+      console.log("Pretty board received:", prettyData);
 
       setGame(gameData);
       setPrettyBoard(prettyData.pretty_board);
       setMoveHistory(prettyData.move_history);
+
+      // Debug game state
+      console.log("Game status:", gameData.status);
+      console.log("Board state:", prettyData.pretty_board ? prettyData.pretty_board.length : 'None');
+
+      // Only log successful fetches if it's not a polling request or if we want to show them
+      if (!isPolling || debugOptions.showPollingRequests) {
+        addDebugMessage(`Game data fetched. Current turn: ${gameData.current_turn}, Status: ${gameData.status}`,
+                        { isPollingRequest: isPolling });
+      }
 
       // If the game is over, redirect to the result page
       if (gameData.status === 'completed' || gameData.status === 'draw') {
@@ -41,7 +181,10 @@ const GamePlayPage = () => {
 
       setError('');
     } catch (err) {
-      setError('Failed to load game data. Please try again.');
+      // Always show errors, even from polling requests
+      const errorMessage = `Failed to load game data: ${err.message}`;
+      setError(errorMessage);
+      addDebugMessage(errorMessage);
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -49,28 +192,49 @@ const GamePlayPage = () => {
   };
 
   const handleMakeMove = async (from, to) => {
+    addDebugMessage(`Move attempt from ${from} to ${to}`);
+
     if (!selectedPlayer) {
-      setError('Please select which player you are');
+      const errorMsg = 'Please select which player you are';
+      setError(errorMsg);
+      addDebugMessage(errorMsg);
       setShowPlayerSelection(true);
       return;
     }
 
+    if (!game) {
+      const errorMsg = 'Game data not loaded yet';
+      setError(errorMsg);
+      addDebugMessage(errorMsg);
+      return;
+    }
+
+    addDebugMessage(`Selected player: ${selectedPlayer}, Current turn: ${game.current_turn}`);
     const currentPlayerId =
       game.current_turn === 'white'
         ? game.white_player.id
         : game.black_player.id;
 
     if (selectedPlayer !== currentPlayerId.toString()) {
-      setError(`It's not your turn. Current turn: ${game.current_turn}`);
+      const errorMsg = `It's not your turn. Current turn: ${game.current_turn}`;
+      setError(errorMsg);
+      addDebugMessage(errorMsg);
       return;
     }
 
     try {
       setIsLoading(true);
-      await api.makeMove(gameId, selectedPlayer, from, to);
-      await fetchGameData();
+      addDebugMessage(`Making API call to move from ${from} to ${to} for player ${selectedPlayer}`);
+
+      const response = await api.makeMove(gameId, selectedPlayer, from, to);
+      addDebugMessage(`Move API response: ${JSON.stringify(response)}`);
+
+      await fetchGameData(false); // Not a polling request, this is after a move
+      addDebugMessage('Game data refreshed after move');
     } catch (err) {
-      setError('Invalid move. Please try again.');
+      const errorMsg = `Invalid move: ${err.message}`;
+      setError(errorMsg);
+      addDebugMessage(errorMsg);
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -78,7 +242,9 @@ const GamePlayPage = () => {
   };
 
   const handlePlayerSelect = (e) => {
-    setSelectedPlayer(e.target.value);
+    const playerId = e.target.value;
+    addDebugMessage(`Player selected: ${playerId}`);
+    setSelectedPlayer(playerId);
     setShowPlayerSelection(false);
     setError('');
   };
@@ -126,6 +292,54 @@ const GamePlayPage = () => {
     }
   };
 
+  // Toggle debug options
+  const toggleDebugOption = (option) => {
+    const newValue = !debugOptions[option];
+    setDebugOptions(prev => ({
+      ...prev,
+      [option]: newValue
+    }));
+
+    // Sync with both debuggers
+    if (option === 'showPollingRequests') {
+      setDebugConfig({ showPollingRequests: newValue });
+      updateApiDebugConfig({ showPollingRequests: newValue });
+    }
+
+    addDebugMessage(`Debug option '${option}' set to: ${newValue}`);
+  };
+
+  // Handle force debug click for testing
+  const handleForceDebugClick = () => {
+    addDebugMessage('Force debug click on a2');
+    logClickEvent('Force debug click on a2');
+
+    // Make sure we see these events in the browser console
+    console.log("FORCE DEBUG CLICK - adding to logs");
+
+    // Simulate a click on position a2
+    const testPosition = 'a2';
+    if (game && game.status === 'active') {
+      // Find if there's a piece at a2
+      const pieces = document.querySelectorAll('.board-square');
+      let a2Square = null;
+      pieces.forEach(p => {
+        if (p.dataset.position === testPosition) {
+          a2Square = p;
+        }
+      });
+
+      if (a2Square) {
+        a2Square.click();
+        addDebugMessage(`Clicked on ${testPosition}`);
+      } else {
+        addDebugMessage(`Couldn't find ${testPosition} element`);
+      }
+    } else {
+      addDebugMessage('Game not active, cannot force debug click');
+    }
+  };
+
   if (isLoading && !game) {
     return <div className="loading">Loading game data...</div>;
   }
@@ -141,6 +355,13 @@ const GamePlayPage = () => {
   const isCheckmate = game.in_checkmate;
   const isCheck = game.in_check;
   const gameStatus = isCheckmate ? 'checkmate' : (game.status === 'active' ? 'active' : game.status);
+
+  // Log the current debug info before rendering
+  console.log("Rendering GamePlayPage with:", {
+    debugMessagesCount: debugMessages.length,
+    clickEventsCount: clickEvents.length,
+    apiEventsCount: apiEvents.length
+  });
 
   return (
     <div className="game-play-page">
@@ -236,6 +457,19 @@ const GamePlayPage = () => {
             >
               Resign
             </button>
+            <button
+              className="btn btn-info"
+              onClick={() => {
+                logClickEvent("Manual test click event");
+                addDebugMessage("Manual test debug message");
+
+                // Add test API event
+                const timestamp = new Date().toLocaleTimeString();
+                setApiEvents(prev => [`${timestamp}: [TEST] API button clicked`, ...prev]);
+              }}
+            >
+              Test Debug
+            </button>
           </div>
         </div>
 
@@ -246,9 +480,20 @@ const GamePlayPage = () => {
             onMakeMove={handleMakeMove}
             gameStatus={gameStatus}
             gameId={gameId}
+            logClickEvent={logClickEvent}
           />
         </div>
       </div>
+
+      {/* Debug Panel */}
+      <DebugPanel
+        clickEvents={clickEvents}
+        gameDebugMessages={debugMessages}
+        apiEvents={apiEvents}
+        clearClickEvents={() => setClickEvents([])}
+        clearGameDebugMessages={() => setDebugMessages([])}
+        onForceDebugClick={handleForceDebugClick}
+      />
     </div>
   );
 };

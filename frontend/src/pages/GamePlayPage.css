@@ -1,161 +1,295 @@
 .game-play-page {
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 20px;
 }
 
 .game-title {
   text-align: center;
   margin-bottom: 20px;
-  color: var(--primary-color);
 }
 
 .game-container {
   display: flex;
   flex-wrap: wrap;
   gap: 30px;
-  margin-top: 20px;
-}
-
-.board-container {
-  flex: 1;
-  min-width: 480px;
+  justify-content: center;
 }
 
 .game-info {
   flex: 1;
   min-width: 300px;
+  max-width: 500px;
+}
+
+.board-container {
+  flex: 1;
+  min-width: 480px;
+  display: flex;
+  justify-content: center;
 }
 
 .player-info {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 15px;
   margin-bottom: 20px;
 }
 
 .player {
   padding: 15px;
   border-radius: 5px;
-  flex: 1;
-  margin: 0 5px;
+  position: relative;
 }
 
 .white-player {
-  background-color: rgba(255, 255, 255, 0.8);
-  border: 1px solid #ddd;
-}
-
-.black-player {
-  background-color: rgba(0, 0, 0, 0.05);
-  border: 1px solid #ddd;
-}
-
-.player h3 {
-  margin: 0 0 10px 0;
-  font-size: 16px;
-  color: var(--primary-color);
-}
-
-.player p {
-  margin: 0;
-  font-size: 14px;
-}
-
-.turn-indicator {
-  margin: 20px 0;
-  padding: 10px;
-  border-radius: 5px;
-  background-color: white;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  text-align: center;
-}
-
-.turn {
-  font-weight: bold;
-  display: block;
-  margin-bottom: 5px;
-}
-
-.turn.white {
-  color: var(--primary-color);
-}
-
-.turn.black {
+  background-color: #f0f0f0;
   color: #333;
 }
 
-.check-indicator {
-  color: var(--accent-color);
+.black-player {
+  background-color: #333;
+  color: #f0f0f0;
+}
+
+.active-player {
+  box-shadow: 0 0 0 3px var(--primary-color);
+}
+
+.you-indicator {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: var(--primary-color);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+.turn-indicator {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.turn {
+  font-size: 18px;
   font-weight: bold;
-  margin-left: 10px;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.turn.white {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.turn.black {
+  background-color: #333;
+  color: #f0f0f0;
+}
+
+.check-indicator {
+  color: red;
+  font-weight: bold;
+  font-size: 18px;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
 }
 
 .select-player-form {
-  margin: 20px 0;
-  padding: 15px;
-  background-color: white;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
 }
 
-.select-player-form label {
-  display: block;
+.form-control {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
   margin-bottom: 10px;
-  font-weight: bold;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.change-player-btn {
+  display: block;
+  margin-top: 5px;
 }
 
 .move-history {
-  margin: 20px 0;
-  padding: 15px;
-  background-color: white;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.move-history h3 {
-  margin-top: 0;
-  color: var(--primary-color);
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 .moves-list {
   max-height: 200px;
   overflow-y: auto;
-  border: 1px solid #eee;
   padding: 10px;
-  background-color: #f9f9f9;
-  border-radius: 3px;
-}
-
-.moves-list pre {
-  margin: 0;
-  white-space: pre-wrap;
-  font-family: monospace;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f5f5f5;
 }
 
 .game-actions {
   display: flex;
   gap: 10px;
+  margin-bottom: 20px;
+}
+
+.player-selection-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.player-selection-modal {
+  background-color: white;
+  border-radius: 5px;
+  padding: 30px;
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+}
+
+.player-options {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
   margin-top: 20px;
 }
 
-.loading, .error {
-  text-align: center;
-  margin: 50px 0;
-  padding: 20px;
-  background-color: white;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+.player-btn {
+  padding: 15px !important;
+  font-size: 18px !important;
 }
 
-.error {
-  color: var(--accent-color);
+.white-btn {
+  background-color: #f0f0f0 !important;
+  color: #333 !important;
+  border: 2px solid #333;
 }
 
-@media (max-width: 1100px) {
+.black-btn {
+  background-color: #333 !important;
+  color: #f0f0f0 !important;
+}
+
+.alert {
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.alert-error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Remove debug-related styles */
+.debug-panel {
+  display: none; /* Hide the old debug panel */
+}
+
+.debug-options,
+.debug-buttons,
+.debug-messages,
+.debug-message,
+.debug-option {
+  display: none; /* Hide the old debug elements */
+}
+
+@media (max-width: 768px) {
   .game-container {
     flex-direction: column-reverse;
   }
+}
 
-  .board-container, .game-info {
-    min-width: 100%;
-  }
+.debug-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.debug-buttons .btn {
+  font-size: 12px;
+  padding: 5px 10px;
+  white-space: nowrap;
+}
+
+.btn-info {
+  background-color: #17a2b8;
+  color: white;
+  border: none;
+}
+
+.btn-success {
+  background-color: #28a745;
+  color: white;
+  border: none;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+  border: none;
+}
+
+.btn-warning {
+  background-color: #ffc107;
+  color: #212529;
+  border: none;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Add styling for debug options */
+.debug-options {
+  margin-bottom: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.debug-option {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.debug-option input[type="checkbox"] {
+  margin-right: 5px;
 }
